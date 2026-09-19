@@ -1,0 +1,57 @@
+{
+  "mode": "Synthetic HTTP; actual adapter normalization and attempt ledger",
+  "request": "Morgan owns this item.",
+  "outputs": [
+    {
+      "model": "working-fixture",
+      "text": "{\"owner\":\"Morgan\"}",
+      "usage": {
+        "input_tokens": 12,
+        "output_tokens": 7,
+        "input_tokens_details": {
+          "cached_tokens": null
+        }
+      }
+    }
+  ],
+  "records": [
+    {
+      "provider_key": "demo",
+      "model_id": "missing-fixture",
+      "task_name": "extract_owner",
+      "status": "fixable",
+      "can_list_models": null,
+      "can_execute_task": false,
+      "blocked_reason": "The selected model or endpoint was not found.",
+      "fix_hint": "Refresh inventory or correct the model/endpoint, then retry.",
+      "error_type": "provider_error",
+      "error_message": "unknown model"
+    },
+    {
+      "provider_key": "demo",
+      "model_id": "timeout-fixture",
+      "task_name": "extract_owner",
+      "status": "unknown",
+      "can_list_models": null,
+      "can_execute_task": false,
+      "blocked_reason": "The attempt did not establish task compatibility.",
+      "fix_hint": "Retry when the provider is reachable.",
+      "error_type": "connection_error",
+      "error_message": "connection timed out"
+    },
+    {
+      "provider_key": "demo",
+      "model_id": "working-fixture",
+      "task_name": "extract_owner",
+      "status": "supported",
+      "can_list_models": null,
+      "can_execute_task": true,
+      "blocked_reason": null,
+      "fix_hint": null,
+      "error_type": null,
+      "error_message": null
+    }
+  ],
+  "transport_calls": 3,
+  "network_calls": 0
+}

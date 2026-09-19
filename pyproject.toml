@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "model-provider-compatibility-lab"
+version = "0.1.0"
+description = "Evidence-backed model/provider/task compatibility records."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["requests>=2.32,<3.0"]
+
+[project.scripts]
+provider-compat-demo = "provider_compat.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
