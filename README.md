@@ -25,7 +25,9 @@ Source: [src/provider_compat/adapters.py](src/provider_compat/adapters.py), [src
 
 ## Use it for your work
 
-Use `ProviderConfig` with your explicit endpoint and environment-derived credential, instantiate an adapter, and call `attempt_task`. Supply `can_list_models` only from an actual inventory observation. For task-quality comparisons, use Mortal Kombat.
+Use `ProviderConfig` with your explicit endpoint and environment-derived credential, instantiate an adapter, and call `attempt_task`. Supply `can_list_models` only from an actual inventory observation. For task-quality comparisons, use [Rubric Rumble](https://github.com/CinvanaAI/rubric-rumble).
+
+Follow the [evidence and selection guide](docs/EVIDENCE.md) to interpret a record, select candidates and recover from malformed local evidence.
 
 ## Scope
 

@@ -14,6 +14,11 @@ from .types import AttemptEvidence, ProviderError
 STATUSES = ("supported", "unsupported", "fixable", "unknown")
 
 
+def _validate_record(record: Any) -> None:
+    if not isinstance(record, dict) or not all(isinstance(record.get(k), str) and record[k] for k in ("provider_key", "model_id", "task_name")) or record.get("status") not in STATUSES:
+        raise ValueError("Compatibility ledger contains an invalid evidence record")
+
+
 def classify_failure(error: BaseException) -> tuple[str, str, str | None]:
     """Classify a failed attempt without claiming more than the error proves."""
 
@@ -74,14 +79,23 @@ class CompatibilityLedger:
     def load(self) -> dict[str, Any]:
         if not self.path.exists():
             return {"records": []}
-        try:
-            payload = json.loads(self.path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            return {"records": []}
+        # Existing evidence must never silently become an empty ledger.
+        payload = json.loads(self.path.read_text(encoding="utf-8"))
         records = payload.get("records") if isinstance(payload, dict) else None
-        return {"records": records if isinstance(records, list) else []}
+        if not isinstance(records, list):
+            raise ValueError("Compatibility ledger must contain a records list")
+        keys = set()
+        for record in records:
+            _validate_record(record)
+            key = (record["provider_key"], record["model_id"], record["task_name"])
+            if key in keys:
+                raise ValueError("Compatibility ledger contains duplicate evidence keys")
+            keys.add(key)
+        return {"records": records}
 
     def upsert(self, evidence: AttemptEvidence) -> None:
+        incoming = asdict(evidence)
+        _validate_record(incoming)
         payload = self.load()
         key = (evidence.provider_key, evidence.model_id, evidence.task_name)
         records = [
@@ -92,7 +106,7 @@ class CompatibilityLedger:
                 and (record.get("provider_key"), record.get("model_id"), record.get("task_name")) == key
             )
         ]
-        records.append(asdict(evidence))
+        records.append(incoming)
         records.sort(key=lambda item: (item["provider_key"], item["model_id"], item["task_name"]))
         self.path.parent.mkdir(parents=True, exist_ok=True)
         temporary = self.path.with_suffix(self.path.suffix + ".tmp")

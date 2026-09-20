@@ -140,3 +140,26 @@ def test_attempt_runner_records_success_and_rethrows_failure(tmp_path) -> None:
         ("tools", "unsupported"),
     }
 
+
+
+@pytest.mark.parametrize("content", ['{broken', '[]', '{"records":{}}', '{"records":[null]}', '{"records":[{"provider_key":"x"}]}'])
+def test_upsert_preserves_invalid_existing_ledger(tmp_path, content):
+    path = tmp_path / "ledger.json"
+    path.write_text(content, encoding="utf-8")
+    before = path.read_bytes()
+    with pytest.raises(ValueError):
+        CompatibilityLedger(path).upsert(evidence_from_success("demo", "m", "text"))
+    assert path.read_bytes() == before
+
+
+@pytest.mark.parametrize("changes", [{"status": "success"}, {"model_id": ""}, {"provider_key": None}])
+def test_invalid_incoming_evidence_cannot_poison_existing_ledger(tmp_path, changes):
+    from dataclasses import replace
+    ledger = CompatibilityLedger(tmp_path / "ledger.json")
+    valid = evidence_from_success("demo", "model", "text")
+    ledger.upsert(valid)
+    before = ledger.path.read_bytes()
+    with pytest.raises(ValueError, match="invalid evidence"):
+        ledger.upsert(replace(valid, **changes))
+    assert ledger.path.read_bytes() == before
+    assert ledger.load()["records"][0]["status"] == "supported"
